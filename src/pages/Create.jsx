@@ -1,9 +1,14 @@
 import React, { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
+import { useMapStore } from '../store/useMapStore'
 
 export default function Create() {
   const navigate = useNavigate()
+  const setDraftDrop = useMapStore((s) => s.setDraftDrop)
   const [step, setStep] = useState(1)
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState(null)
   const [form, setForm] = useState({
     artistName: '',
     trackTitle: '',
@@ -56,9 +61,51 @@ export default function Create() {
     if (coverInputRef.current) coverInputRef.current.value = ''
   }
 
-  const handleContinue = () => {
-    // Will navigate to /map when that page is built
-    navigate('/map')
+  const uploadFile = async (file, bucket) => {
+    const ext = file.name.split('.').pop()
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+    const { error } = await supabase.storage.from(bucket).upload(path, file)
+    if (error) throw error
+    const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+    return data.publicUrl
+  }
+
+  const handleContinue = async () => {
+    if (!form.artistName || !form.trackTitle) {
+      setUploadError('Artist name and track title are required.')
+      return
+    }
+    setUploadError(null)
+    setUploading(true)
+    try {
+      let audioUrl = null
+      let coverUrl = null
+
+      if (audioFile) audioUrl = await uploadFile(audioFile, 'audio')
+      if (coverArt) coverUrl = await uploadFile(coverArt, 'covers')
+
+      const draft = {
+        title: form.artistName,
+        trackTitle: form.trackTitle,
+        description: form.blurb,
+        collabNotes: form.instructions,
+        externalLink: form.externalLink,
+        contactEmail: form.email,
+        audioUri: audioUrl,
+        coverArt: coverUrl,
+        scheduledStart: isScheduled ? new Date(scheduledDate).getTime() : undefined,
+        radius: 15,
+        durationHours: 24,
+        tracks: [{ title: form.trackTitle }],
+      }
+
+      setDraftDrop(draft)
+      navigate('/map')
+    } catch (err) {
+      setUploadError(`Upload failed: ${err.message}`)
+    } finally {
+      setUploading(false)
+    }
   }
 
   return (
@@ -189,8 +236,17 @@ export default function Create() {
           </div>
 
           {/* CTA */}
-          <button style={styles.nextBtn} onClick={handleContinue}>
-            Continue to Map Placement →
+          {uploadError && (
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: '#B00020', textAlign: 'center' }}>
+              {uploadError}
+            </p>
+          )}
+          <button
+            style={{ ...styles.nextBtn, opacity: uploading ? 0.6 : 1 }}
+            onClick={handleContinue}
+            disabled={uploading}
+          >
+            {uploading ? 'Uploading...' : 'Continue to Map Placement →'}
           </button>
 
           <p style={styles.legal}>
