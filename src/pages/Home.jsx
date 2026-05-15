@@ -111,12 +111,12 @@ export default function Home() {
             {
               n: '01',
               title: 'Plant your sound',
-              body: 'Choose a location that means something. A corner where you wrote the song. A venue you played. A city block that shaped you. Drop your audio there.',
+              body: 'Choose a location that means something. A corner where you wrote the song, A city block that shaped you, A venue you have a partnership with...Let you music live there.',
             },
             {
               n: '02',
               title: 'Set your radius',
-              body: 'Decide how far your node reaches — from a single doorway to a whole neighborhood. Listeners have to be inside that radius to hear it.',
+              body: 'Decide how far your node reaches, from a single doorway to a whole city block. Listeners have to be inside that radius to hear it.',
             },
             {
               n: '03',
