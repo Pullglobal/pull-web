@@ -105,7 +105,7 @@ export default function Home() {
 
       {/* HOW IT WORKS */}
       <section id="how" style={styles.section}>
-        <p style={styles.sectionLabel}>// how it works</p>
+        <p style={styles.sectionLabel}> how it works</p>
         <div style={styles.steps}>
           {[
             {
@@ -138,24 +138,25 @@ export default function Home() {
 
       {/* WHY PULL */}
       <section style={styles.section}>
-        <p style={styles.sectionLabel}>// why pull</p>
+        <p style={styles.sectionLabel}> why pull</p>
         <div style={styles.twoCol}>
           <div>
             <h2 style={styles.h2}>
-              Music has always been<br />about being somewhere.
+              Music belongs<br />in the real world.
             </h2>
           </div>
           <div>
             <p style={styles.bodyText}>
-              Streaming flattened music into an infinite scroll. Pull puts it back in the world —
-              tied to corners, rooms, streets, and moments that actually happened.
+              Streaming flattened music into an infinite scroll. Pull pulls music out of the matrix and puts it back where it belongs: with the people.
+              Songs become tethered to places and moments that actually matter.
             </p>
             <p style={styles.bodyText} >
-              For artists, it's a new kind of release. Not a link to share — a place to visit.
-              For listeners, it's discovery that feels like stumbling onto something real.
+              For artists, Pull is here to revolutionize the release strategy. Songs don't belong in bios, they belong in the real world.
+              As artists ourselves, our hope is that you will tell new stories, find new ways to prosper and rewrite the future of music with the tools this app offers. 
+              For listeners, Pull is an adventure waiting to happen. Discover new music as you wander a new city or get out to experience a drop by your favorite artist. 
             </p>
             <p style={styles.bodyText}>
-              No followers. No algorithm. No feed. Just geography and sound.
+              This isn't about racking up followers or appeasing an algorithim, it's about getting music out for the people and getting people out for the music.
             </p>
           </div>
         </div>
@@ -166,7 +167,7 @@ export default function Home() {
 
       {/* PRICING TEASER */}
       <section style={styles.section}>
-        <p style={styles.sectionLabel}>// drop pricing</p>
+        <p style={styles.sectionLabel}> drop pricing</p>
         <div style={styles.pricingGrid}>
           {[
             { label: 'Base drop', value: '$10', note: 'Any node, any location' },
