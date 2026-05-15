@@ -88,12 +88,12 @@ export default function Home() {
           <WarpGrid />
         </div>
         <div style={styles.heroContent}>
-          <p style={styles.eyebrow}>Music lives here.</p>
+          <p style={styles.eyebrow}>Putting Music on the Map.</p>
           <h1 style={styles.headline}>
             Drop your sound<br />on the map.
           </h1>
           <p style={styles.sub}>
-            Pull lets artists plant audio in real locations —
+            Pull lets artists plant audio in real locations on a 3-D map,
             allowing listeners to discover music where it belongs... in the real world.
           </p>
           <div style={styles.heroActions}>
