@@ -154,7 +154,7 @@ export default function Create() {
             <input
               ref={audioInputRef}
               type="file"
-              accept="audio/mp3,audio/mpeg,audio/wav,audio/wave,audio/x-wav,audio/aiff,audio/x-aiff,audio/flac,audio/ogg,.mp3,.wav,.flac,.aiff,.ogg,.m4a"
+              accept=".mp3,.wav,.flac,.aiff,.ogg,.m4a,.aac"
               style={{ display: 'none' }}
               onChange={handleAudioChange}
             />
