@@ -90,7 +90,7 @@ export default function Home() {
         <div style={styles.heroContent}>
           <p style={styles.eyebrow}>Putting Music on the Map.</p>
           <h1 style={styles.headline}>
-            Drop your sound<br />on the map.
+            What's your<br />Pull.
           </h1>
           <p style={styles.sub}>
             Pull lets artists plant audio in real locations on a 3-D map,
@@ -121,7 +121,7 @@ export default function Home() {
             {
               n: '03',
               title: 'It goes live',
-              body: 'Your drop appears on the Pull map. Listeners walking by feel it pull them in. They play. They stay. They come back.',
+              body: 'Your drop appears on the Pull map. Listeners walking by are pulled. They play it, they lern about you and have an unforgettable ',
             },
           ].map((s) => (
             <div key={s.n} style={styles.step}>
@@ -156,7 +156,7 @@ export default function Home() {
               For listeners, Pull is an adventure waiting to happen. Discover new music as you wander a new city or get out to experience a drop by your favorite artist. 
             </p>
             <p style={styles.bodyText}>
-              This isn't about racking up followers or appeasing an algorithim, it's about getting music out for the people and getting people out for the music.
+              This isn't about racking up followers or appeasing an algorithm, it's about getting music out for the people and getting people out for the music.
             </p>
           </div>
         </div>

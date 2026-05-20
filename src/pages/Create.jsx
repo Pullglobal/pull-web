@@ -94,7 +94,7 @@ export default function Create() {
         audioUri: audioUrl,
         coverArt: coverUrl,
         scheduledStart: isScheduled ? new Date(scheduledDate).getTime() : undefined,
-        radius: 15,
+        radius: 25,
         durationHours: 24,
         tracks: [{ title: form.trackTitle }],
       }
@@ -154,7 +154,7 @@ export default function Create() {
             <input
               ref={audioInputRef}
               type="file"
-              accept="audio/*"
+              accept="audio/mp3,audio/mpeg,audio/wav,audio/wave,audio/x-wav,audio/aiff,audio/x-aiff,audio/flac,audio/ogg,.mp3,.wav,.flac,.aiff,.ogg,.m4a"
               style={{ display: 'none' }}
               onChange={handleAudioChange}
             />
