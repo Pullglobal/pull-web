@@ -119,9 +119,9 @@ export default function MapPage() {
       el.style.cssText = `
         width: 0;
         height: 0;
-        border-left: 15px solid transparent;
-        border-right: 15px solid transparent;
-        border-top: 30px solid #e81212;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-top: 20px solid #e81212;
         position: relative;
         cursor: pointer;
       `
@@ -586,7 +586,7 @@ const s = {
   sliderTicks: { display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: '10px', opacity: 0.35, letterSpacing: '0.04em' },
   nodeStatus: { padding: '12px 0', borderTop: '1px solid rgba(10,10,10,0.08)' },
   nodeHint: { fontFamily: 'var(--font-mono)', fontSize: '12px', opacity: 0.4, letterSpacing: '0.04em' },
-  nodeCount: { fontFamily: 'var(--font-mono)', fontSize: '13px', color: '#00C97C', fontWeight: 700, letterSpacing: '0.04em' },
+  nodeCount: { fontFamily: 'var(--font-mono)', fontSize: '13px', color: '#03d237', fontWeight: 700, letterSpacing: '0.04em' },
   btnCol: { display: 'flex', flexDirection: 'column', gap: '10px' },
   clearBtn: {
     fontFamily: 'var(--font-mono)', fontSize: '12px', fontWeight: 700,
