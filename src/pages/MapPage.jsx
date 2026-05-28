@@ -21,7 +21,6 @@ const SCHEDULED_COLOR = '#999999'
 const DEFAULT_CENTER = [-74.006, 40.7128]
 const DEFAULT_ZOOM = 15
 
-// Default draft drop so node placement works immediately
 const DEFAULT_DRAFT = {
   radius: 15,
   durationHours: 24,
@@ -34,6 +33,7 @@ export default function MapPage() {
   const map = useRef(null)
   const markersRef = useRef({})
   const circleIdsRef = useRef(new Set())
+  const searchMarkerRef = useRef(null)
 
   const draftDrop = useMapStore((s) => s.draftDrop)
   const updateDraftDrop = useMapStore((s) => s.updateDraftDrop)
@@ -50,26 +50,22 @@ export default function MapPage() {
   const [panelOpen, setPanelOpen] = useState(true)
   const tapHintTimer = useRef(null)
 
-  // Ensure draftDrop always has defaults so clicking works immediately
   useEffect(() => {
-    if (!draftDrop) {
-      setDraftDrop(DEFAULT_DRAFT)
-    }
+    if (!draftDrop) setDraftDrop(DEFAULT_DRAFT)
   }, [])
 
   const activeDraft = draftDrop ?? DEFAULT_DRAFT
-  const radius = activeDraft.radius ?? 25
+  const radius = activeDraft.radius ?? 15
   const duration = activeDraft.durationHours ?? 24
   const draftNodes = nodes.filter((n) => n.status === 'draft')
-  const price = calculatePrice(activeDraft, draftNodes.length)
+  // Show $0.00 until first node is placed
+  const price = draftNodes.length === 0 ? '0.00' : calculatePrice(activeDraft, draftNodes.length)
 
-  // Clock
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(interval)
   }, [])
 
-  // Geolocation
   useEffect(() => {
     if (!navigator.geolocation) return
     navigator.geolocation.getCurrentPosition(
@@ -84,7 +80,6 @@ export default function MapPage() {
     )
   }, [mapReady])
 
-  // Load live nodes from Supabase
   useEffect(() => {
     fetchActiveNodes().then((rows) => {
       const liveNodes = rows.map(rowToNode)
@@ -93,12 +88,11 @@ export default function MapPage() {
     })
   }, [])
 
-  // Init Mapbox
   useEffect(() => {
     if (map.current) return
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
+      style: 'mapbox://styles/mapbox/light-v11',
       center: DEFAULT_CENTER,
       zoom: DEFAULT_ZOOM,
       pitch: 45,
@@ -115,10 +109,37 @@ export default function MapPage() {
       collapsed: false,
       marker: false,
     })
+
+    geocoder.on('result', (e) => {
+      const [lng, lat] = e.result.geometry.coordinates
+      // Remove previous search marker
+      if (searchMarkerRef.current) searchMarkerRef.current.remove()
+      // Create a pin marker at the search result
+      const el = document.createElement('div')
+      el.style.cssText = `
+        width: 0;
+        height: 0;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-top: 20px solid #1E3A8A;
+        position: relative;
+        cursor: pointer;
+      `
+      const dot = document.createElement('div')
+      dot.style.cssText = `
+        width: 8px; height: 8px; border-radius: 50%;
+        background: #1E3A8A; position: absolute;
+        top: -24px; left: -4px;
+      `
+      el.appendChild(dot)
+      searchMarkerRef.current = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+        .setLngLat([lng, lat])
+        .addTo(map.current)
+    })
+
     map.current.addControl(geocoder, 'top-left')
 
     map.current.on('load', () => {
-      // 3D buildings
       map.current.addLayer({
         id: '3d-buildings',
         source: 'composite',
@@ -126,16 +147,15 @@ export default function MapPage() {
         filter: ['==', 'extrude', 'true'],
         type: 'fill-extrusion',
         paint: {
-          'fill-extrusion-color': '#1a1a2e',
+          'fill-extrusion-color': '#d4cfc8',
           'fill-extrusion-height': ['get', 'height'],
           'fill-extrusion-base': ['get', 'min_height'],
-          'fill-extrusion-opacity': 0.8,
+          'fill-extrusion-opacity': 0.7,
         },
       })
       setMapReady(true)
     })
 
-    // Tap to place node — works immediately, no slider required
     map.current.on('click', (e) => {
       const store = useMapStore.getState()
       const draft = store.draftDrop ?? DEFAULT_DRAFT
@@ -161,12 +181,10 @@ export default function MapPage() {
     tapHintTimer.current = setTimeout(() => setTapHint(null), 3000)
   }
 
-  // Render markers + circles
   useEffect(() => {
     if (!mapReady || !map.current) return
     const currentIds = new Set(nodes.map((n) => n.id))
 
-    // Remove stale markers
     Object.keys(markersRef.current).forEach((id) => {
       if (!currentIds.has(id)) {
         markersRef.current[id].marker.remove()
@@ -174,7 +192,6 @@ export default function MapPage() {
       }
     })
 
-    // Add/update markers
     nodes.forEach((node) => {
       const status = getNodeStatus(node, now)
       const heat = getHeatColor(node.playCount ?? 0)
@@ -208,11 +225,10 @@ export default function MapPage() {
       }
     })
 
-    // Radius circles
     nodes.forEach((node) => {
       const status = getNodeStatus(node, now)
       const heat = getHeatColor(node.playCount ?? 0)
-      const nodeRadius = node.status === 'draft' ? radius : (node.draftDrop?.radius ?? 25)
+      const nodeRadius = node.status === 'draft' ? radius : (node.draftDrop?.radius ?? 15)
       const sourceId = `circle-${node.id}`
       const fillId = `fill-${node.id}`
       const strokeId = `stroke-${node.id}`
@@ -241,7 +257,6 @@ export default function MapPage() {
       }
     })
 
-    // Clean up removed circles using tracked IDs
     circleIdsRef.current.forEach((id) => {
       if (!currentIds.has(id)) {
         const fillId = `fill-${id}`
@@ -282,7 +297,7 @@ export default function MapPage() {
           100% { transform: scale(2.2); opacity: 0; }
         }
         .mapboxgl-ctrl-bottom-right { bottom: 32px !important; right: ${panelOpen ? '380px' : '24px'} !important; transition: right 0.3s ease; }
-        .mapboxgl-ctrl-top-left { top: 50px !important; left: px !important; }
+        .mapboxgl-ctrl-top-left { top: 50px !important; left: 0px !important; }
         .mapboxgl-ctrl-geocoder {
           min-width: 280px !important;
           max-width: 320px !important;
@@ -300,10 +315,8 @@ export default function MapPage() {
         .mapboxgl-ctrl-geocoder--suggestion { font-family: 'DM Sans', sans-serif !important; font-size: 13px !important; }
       `}</style>
 
-      {/* FULL SCREEN MAP */}
       <div ref={mapContainer} style={s.map} />
 
-      {/* TOP LEFT — Back button + Creative Mode banner */}
       <div style={s.topLeft}>
         <button style={s.backBtn} onClick={() => navigate('/create')}>← Back to Form</button>
         <div style={s.creativeBanner}>
@@ -311,15 +324,12 @@ export default function MapPage() {
         </div>
       </div>
 
-      {/* STEP BADGE */}
       <div style={s.stepBadge}>
         <span style={s.stepBadgeText}> tap the map to place your node</span>
       </div>
 
-      {/* TAP HINT */}
       {tapHint && <div style={s.tapHint}>{tapHint}</div>}
 
-      {/* SCHEDULED COUNTDOWNS */}
       {scheduledNodes.map((node, i) => (
         <div key={`label-${node.id}`} style={{ ...s.countdownLabel, top: `${80 + i * 56}px` }}>
           <span>{node.draftDrop?.trackTitle ?? 'Untitled'} · {node.draftDrop?.title ?? 'Unknown'}</span>
@@ -327,7 +337,6 @@ export default function MapPage() {
         </div>
       ))}
 
-      {/* PANEL TOGGLE TAB */}
       <button
         style={{ ...s.panelTab, right: panelOpen ? '356px' : '0px' }}
         onClick={() => setPanelOpen(!panelOpen)}
@@ -338,17 +347,14 @@ export default function MapPage() {
         )}
       </button>
 
-      {/* FLOATING SIDE PANEL */}
       <div style={{ ...s.panel, transform: panelOpen ? 'translateX(0)' : 'translateX(100%)' }}>
         <div style={s.panelInner}>
 
-          {/* Panel header */}
           <div style={s.panelHeader}>
             <span style={s.panelTitle}>Drop Settings</span>
             <span style={s.panelPrice}>${price}</span>
           </div>
 
-          {/* Radius slider */}
           <div style={s.sliderBlock}>
             <div style={s.sliderLabelRow}>
               <span style={s.sliderLabel}>Radius</span>
@@ -360,7 +366,6 @@ export default function MapPage() {
             <div style={s.sliderTicks}><span>15m</span><span>43m</span><span>72m</span><span>100m</span></div>
           </div>
 
-          {/* Duration slider */}
           <div style={s.sliderBlock}>
             <div style={s.sliderLabelRow}>
               <span style={s.sliderLabel}>Duration</span>
@@ -372,7 +377,6 @@ export default function MapPage() {
             <div style={s.sliderTicks}><span>1hr</span><span>1wk</span><span>2wk</span><span>30d</span></div>
           </div>
 
-          {/* Node count + hint */}
           <div style={s.nodeStatus}>
             {draftNodes.length === 0
               ? <span style={s.nodeHint}>Tap the map to place your node</span>
@@ -380,7 +384,6 @@ export default function MapPage() {
             }
           </div>
 
-          {/* Actions */}
           <div style={s.btnCol}>
             {draftNodes.length > 0 && (
               <button style={s.clearBtn} onClick={clearLastNode}>✕ Clear Last Node</button>
@@ -424,8 +427,6 @@ const s = {
     inset: 0,
     top: '64px',
   },
-
-  // Top left controls
   topLeft: {
     position: 'absolute',
     top: '80px',
@@ -449,8 +450,6 @@ const s = {
     letterSpacing: '0.04em',
     boxShadow: '0 2px 8px rgba(255, 6, 6, 0.54)',
   },
-
-  // Step badge
   stepBadge: {
     position: 'absolute',
     bottom: '32px',
@@ -468,8 +467,6 @@ const s = {
     fontSize: '11px',
     letterSpacing: '0.08em',
   },
-
-  // Tap hint
   tapHint: {
     position: 'absolute',
     bottom: '80px',
@@ -486,8 +483,6 @@ const s = {
     whiteSpace: 'nowrap',
     boxShadow: '0 2px 12px rgba(0, 0, 0, 0.3)',
   },
-
-  // Countdown
   countdownLabel: {
     position: 'absolute',
     left: '50%',
@@ -504,8 +499,6 @@ const s = {
     fontFamily: 'var(--font-mono)',
     fontSize: '11px',
   },
-
-  // Panel toggle tab
   panelTab: {
     position: 'absolute',
     top: '50%',
@@ -546,8 +539,6 @@ const s = {
     fontFamily: 'var(--font-mono)',
     fontWeight: 700,
   },
-
-  // Side panel
   panel: {
     position: 'absolute',
     top: '64px',
@@ -587,21 +578,15 @@ const s = {
     fontWeight: 700,
     color: 'var(--blue)',
   },
-
-  // Sliders
   sliderBlock: { display: 'flex', flexDirection: 'column', gap: '10px' },
   sliderLabelRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' },
   sliderLabel: { fontFamily: 'var(--font-mono)', fontSize: '13px', fontWeight: 700, letterSpacing: '0.06em', color: 'var(--black)' },
   sliderValue: { fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--blue)', fontWeight: 700 },
   slider: { width: '100%', accentColor: 'var(--blue)', cursor: 'pointer' },
   sliderTicks: { display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: '10px', opacity: 0.35, letterSpacing: '0.04em' },
-
-  // Node status
   nodeStatus: { padding: '12px 0', borderTop: '1px solid rgba(10,10,10,0.08)' },
   nodeHint: { fontFamily: 'var(--font-mono)', fontSize: '12px', opacity: 0.4, letterSpacing: '0.04em' },
   nodeCount: { fontFamily: 'var(--font-mono)', fontSize: '13px', color: '#00C97C', fontWeight: 700, letterSpacing: '0.04em' },
-
-  // Buttons
   btnCol: { display: 'flex', flexDirection: 'column', gap: '10px' },
   clearBtn: {
     fontFamily: 'var(--font-mono)', fontSize: '12px', fontWeight: 700,
