@@ -117,11 +117,11 @@ export default function MapPage() {
       // Create a pin marker at the search result
       const el = document.createElement('div')
       el.style.cssText = `
-        width: 4;
-        height: 4;
-        border-left: 10px solid transparent;
-        border-right: 10px solid transparent;
-        border-top: 20px solid #e81212;
+        width: 0;
+        height: 0;
+        border-left: 15px solid transparent;
+        border-right: 15px solid transparent;
+        border-top: 30px solid #e81212;
         position: relative;
         cursor: pointer;
       `
