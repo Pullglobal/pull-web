@@ -147,7 +147,7 @@ export default function MapPage() {
         filter: ['==', 'extrude', 'true'],
         type: 'fill-extrusion',
         paint: {
-          'fill-extrusion-color': '#ea5f0f',
+          'fill-extrusion-color': '#e6c20e',
           'fill-extrusion-height': ['get', 'height'],
           'fill-extrusion-base': ['get', 'min_height'],
           'fill-extrusion-opacity': 0.7,
