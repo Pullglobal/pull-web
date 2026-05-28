@@ -92,7 +92,7 @@ export default function MapPage() {
     if (map.current) return
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/outdoors-v12',
+      style: 'mapbox://styles/mapbox/streets-v12',
       center: DEFAULT_CENTER,
       zoom: DEFAULT_ZOOM,
       pitch: 45,
@@ -147,7 +147,7 @@ export default function MapPage() {
         filter: ['==', 'extrude', 'true'],
         type: 'fill-extrusion',
         paint: {
-          'fill-extrusion-color': '#324940',
+          'fill-extrusion-color': '#f2f1e5',
           'fill-extrusion-height': ['get', 'height'],
           'fill-extrusion-base': ['get', 'min_height'],
           'fill-extrusion-opacity': 0.7,
