@@ -92,7 +92,7 @@ export default function MapPage() {
     if (map.current) return
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/light-v12',
+      style: 'mapbox://styles/mapbox/outdoors-v12',
       center: DEFAULT_CENTER,
       zoom: DEFAULT_ZOOM,
       pitch: 45,
