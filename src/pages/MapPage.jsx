@@ -121,14 +121,15 @@ export default function MapPage() {
         height: 0;
         border-left: 10px solid transparent;
         border-right: 10px solid transparent;
-        border-top: 20px solid #e81212;
+        border-top: 20px solid #ff0000;  // ← change this color
         position: relative;
         cursor: pointer;
       `
       const dot = document.createElement('div')
       dot.style.cssText = `
         width: 8px; height: 8px; border-radius: 50%;
-        background: #1E3A8A; position: absolute;
+        background: #ff0000;  // ← and this one
+        position: absolute;
         top: -24px; left: -4px;
       `
       el.appendChild(dot)
