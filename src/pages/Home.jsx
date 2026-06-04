@@ -90,7 +90,7 @@ export default function Home() {
         <div style={styles.heroContent}>
           <p style={styles.eyebrow}>Putting Music on the Map.</p>
           <h1 style={styles.headline}>
-            What's your<br />Pull.
+            What's your<br />Pull?
           </h1>
           <p style={styles.sub}>
             Pull lets artists plant audio in real locations on a 3-D map,
