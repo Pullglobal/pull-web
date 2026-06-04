@@ -1,15 +1,15 @@
-import { useState, useEffect } from 'react'
+import {
+  CardElement,
+  Elements,
+  useElements,
+  useStripe,
+} from '@stripe/react-stripe-js'
+import { loadStripe } from '@stripe/stripe-js'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useMapStore } from '../store/useMapStore'
 import { calculatePrice } from '../lib/nodeUtils'
 import { supabase } from '../lib/supabase'
-import { loadStripe } from '@stripe/stripe-js'
-import {
-  Elements,
-  CardElement,
-  useStripe,
-  useElements,
-} from '@stripe/react-stripe-js'
+import { useMapStore } from '../store/useMapStore'
 
 const SUPABASE_FUNCTION_URL = 'https://bbiycmbahjpwvezndrzj.supabase.co/functions/v1/create-payment-intent'
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -195,7 +195,7 @@ export default function ReviewPage() {
   return (
     <div style={s.page}>
       <div style={s.inner}>
-        <p style={s.eyebrow}>// step 3 of 3</p>
+        <p style={s.eyebrow}>step 3 of 3</p>
         <h1 style={s.title}>Review & Pay</h1>
 
         {/* Summary */}

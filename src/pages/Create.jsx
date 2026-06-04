@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useMapStore } from '../store/useMapStore'
@@ -246,7 +246,7 @@ export default function Create() {
             onClick={handleContinue}
             disabled={uploading}
           >
-            {uploading ? 'Uploading...' : 'Continue to Map Placement →'}
+            {uploading ? 'Uploading... (May take 30 secs)' : 'Continue to Map Placement →'}
           </button>
 
           <p style={styles.legal}>
