@@ -105,7 +105,7 @@ export default function MapPage() {
     const geocoder = new MapboxGeocoder({
       accessToken: mapboxgl.accessToken,
       mapboxgl: mapboxgl,
-      placeholder: 'Search for a location...',
+      placeholder: 'Search for a location (using its address)...',
       collapsed: false,
       marker: false,
     })
