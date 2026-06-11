@@ -26,12 +26,18 @@ const DEFAULT_DRAFT = {
   tracks: [],
 }
 
+function metersToPixels(meters, latitude, zoom) {
+  const earthCircumference = 40075016.686
+  const latRad = (latitude * Math.PI) / 180
+  const metersPerPixel = (earthCircumference * Math.cos(latRad)) / Math.pow(2, zoom + 8)
+  return meters / metersPerPixel
+}
+
 export default function MapPage() {
   const navigate = useNavigate()
   const mapContainer = useRef(null)
   const map = useRef(null)
   const markersRef = useRef({})
-  const circleIdsRef = useRef(new Set())
   const searchMarkerRef = useRef(null)
 
   const draftDrop = useMapStore((s) => s.draftDrop)
@@ -57,7 +63,6 @@ export default function MapPage() {
   const radius = activeDraft.radius ?? 15
   const duration = activeDraft.durationHours ?? 24
   const draftNodes = nodes.filter((n) => n.status === 'draft')
-  // Show $0.00 until first node is placed
   const price = draftNodes.length === 0 ? '0.00' : calculatePrice(activeDraft, draftNodes.length)
 
   useEffect(() => {
@@ -111,23 +116,21 @@ export default function MapPage() {
 
     geocoder.on('result', (e) => {
       const [lng, lat] = e.result.geometry.coordinates
-      // Remove previous search marker
       if (searchMarkerRef.current) searchMarkerRef.current.remove()
-      // Create a pin marker at the search result
       const el = document.createElement('div')
       el.style.cssText = `
         width: 0;
         height: 0;
         border-left: 10px solid transparent;
         border-right: 10px solid transparent;
-        border-top: 20px solid #ff0000;  // ← change this color
+        border-top: 20px solid #ff0000;
         position: relative;
         cursor: pointer;
       `
       const dot = document.createElement('div')
       dot.style.cssText = `
         width: 8px; height: 8px; border-radius: 50%;
-        background: #ff0000;  // ← and this one
+        background: #ff0000;
         position: absolute;
         top: -24px; left: -4px;
       `
@@ -154,6 +157,10 @@ export default function MapPage() {
         },
       })
       setMapReady(true)
+    })
+
+    map.current.on('zoom', () => {
+      setNow(Date.now())
     })
 
     map.current.on('click', (e) => {
@@ -185,6 +192,7 @@ export default function MapPage() {
     if (!mapReady || !map.current) return
     const currentIds = new Set(nodes.map((n) => n.id))
 
+    // Clean up removed markers
     Object.keys(markersRef.current).forEach((id) => {
       if (!currentIds.has(id)) {
         markersRef.current[id].marker.remove()
@@ -192,6 +200,7 @@ export default function MapPage() {
       }
     })
 
+    // Render dot markers
     nodes.forEach((node) => {
       const status = getNodeStatus(node, now)
       const heat = getHeatColor(node.playCount ?? 0)
@@ -225,13 +234,14 @@ export default function MapPage() {
       }
     })
 
-    nodes.forEach((node) => {
+    // Render circles using native Mapbox circle layer (correctly centered, zoom-aware)
+    const zoom = map.current.getZoom()
+
+    const circleFeatures = nodes.map((node) => {
       const status = getNodeStatus(node, now)
       const heat = getHeatColor(node.playCount ?? 0)
       const nodeRadius = node.status === 'draft' ? radius : (node.draftDrop?.radius ?? 15)
-      const sourceId = `circle-${node.id}`
-      const fillId = `fill-${node.id}`
-      const strokeId = `stroke-${node.id}`
+      const pixelRadius = metersToPixels(nodeRadius, node.coordinate.latitude, zoom)
 
       const strokeColor = status === 'live' ? heat.stroke
         : status === 'draft' ? 'rgba(0,122,255,0.5)'
@@ -240,34 +250,36 @@ export default function MapPage() {
         : status === 'draft' ? 'rgba(0,122,255,0.08)'
         : 'rgba(153,153,153,0.06)'
 
-      const circleData = createGeoJSONCircle(
-        [node.coordinate.longitude, node.coordinate.latitude],
-        nodeRadius
-      )
-
-      if (!map.current.getSource(sourceId)) {
-        map.current.addSource(sourceId, { type: 'geojson', data: circleData })
-        map.current.addLayer({ id: fillId, type: 'fill', source: sourceId, paint: { 'fill-color': fillColor } })
-        map.current.addLayer({ id: strokeId, type: 'line', source: sourceId, paint: { 'line-color': strokeColor, 'line-width': 1.5 } })
-        circleIdsRef.current.add(node.id)
-      } else {
-        map.current.getSource(sourceId).setData(circleData)
-        map.current.setPaintProperty(fillId, 'fill-color', fillColor)
-        map.current.setPaintProperty(strokeId, 'line-color', strokeColor)
+      return {
+        type: 'Feature',
+        properties: { id: node.id, radius: pixelRadius, fillColor, strokeColor },
+        geometry: {
+          type: 'Point',
+          coordinates: [node.coordinate.longitude, node.coordinate.latitude],
+        },
       }
     })
 
-    circleIdsRef.current.forEach((id) => {
-      if (!currentIds.has(id)) {
-        const fillId = `fill-${id}`
-        const strokeId = `stroke-${id}`
-        const sourceId = `circle-${id}`
-        if (map.current.getLayer(fillId)) map.current.removeLayer(fillId)
-        if (map.current.getLayer(strokeId)) map.current.removeLayer(strokeId)
-        if (map.current.getSource(sourceId)) map.current.removeSource(sourceId)
-        circleIdsRef.current.delete(id)
-      }
-    })
+    const geojson = { type: 'FeatureCollection', features: circleFeatures }
+
+    if (!map.current.getSource('circles')) {
+      map.current.addSource('circles', { type: 'geojson', data: geojson })
+      map.current.addLayer({
+        id: 'circles-fill',
+        type: 'circle',
+        source: 'circles',
+        paint: {
+          'circle-radius': ['get', 'radius'],
+          'circle-color': ['get', 'fillColor'],
+          'circle-stroke-width': 1.5,
+          'circle-stroke-color': ['get', 'strokeColor'],
+          'circle-pitch-alignment': 'map',
+          'circle-pitch-scale': 'map',
+        },
+      })
+    } else {
+      map.current.getSource('circles').setData(geojson)
+    }
   }, [nodes, mapReady, now, radius])
 
   const clearLastNode = useCallback(() => {
@@ -286,8 +298,6 @@ export default function MapPage() {
     const days = Math.round(duration / 24)
     return `${days} day${days !== 1 ? 's' : ''}`
   })()
-
-  const scheduledNodes = nodes.filter((n) => getNodeStatus(n, now) === 'scheduled')
 
   return (
     <div style={s.page}>
@@ -329,7 +339,6 @@ export default function MapPage() {
       </div>
 
       {tapHint && <div style={s.tapHint}>{tapHint}</div>}
-
 
       <button
         style={{ ...s.panelTab, right: panelOpen ? '356px' : '0px' }}
@@ -394,26 +403,6 @@ export default function MapPage() {
       </div>
     </div>
   )
-}
-
-function createGeoJSONCircle(center, radiusInMeters, points = 64) {
-  const coords = []
-  const lat = center[1]
-  const lng = center[0]
-  const metersPerDegreeLat = 111320
-  const metersPerDegreeLng = 111320 * Math.cos((lat * Math.PI) / 180)
-  const deltaLat = radiusInMeters / metersPerDegreeLat
-  const deltaLng = radiusInMeters / metersPerDegreeLng
-
-  for (let i = 0; i < points; i++) {
-    const angle = (i * 2 * Math.PI) / points
-    coords.push([
-      lng + deltaLng * Math.cos(angle),
-      lat + deltaLat * Math.sin(angle),
-    ])
-  }
-  coords.push(coords[0])
-  return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [coords] } }
 }
 
 const s = {
@@ -483,22 +472,6 @@ const s = {
     fontWeight: 700,
     whiteSpace: 'nowrap',
     boxShadow: '0 2px 12px rgba(0, 0, 0, 0.3)',
-  },
-  countdownLabel: {
-    position: 'absolute',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    zIndex: 10,
-    background: 'rgba(0,0,0,0.75)',
-    borderRadius: '8px',
-    padding: '6px 14px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '2px',
-    color: 'white',
-    fontFamily: 'var(--font-mono)',
-    fontSize: '11px',
   },
   panelTab: {
     position: 'absolute',
