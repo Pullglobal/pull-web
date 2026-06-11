@@ -57,7 +57,6 @@ export default function MapPage() {
   const radius = activeDraft.radius ?? 15
   const duration = activeDraft.durationHours ?? 24
   const draftNodes = nodes.filter((n) => n.status === 'draft')
-  // Show $0.00 until first node is placed
   const price = draftNodes.length === 0 ? '0.00' : calculatePrice(activeDraft, draftNodes.length)
 
   useEffect(() => {
@@ -111,23 +110,21 @@ export default function MapPage() {
 
     geocoder.on('result', (e) => {
       const [lng, lat] = e.result.geometry.coordinates
-      // Remove previous search marker
       if (searchMarkerRef.current) searchMarkerRef.current.remove()
-      // Create a pin marker at the search result
       const el = document.createElement('div')
       el.style.cssText = `
         width: 0;
         height: 0;
         border-left: 10px solid transparent;
         border-right: 10px solid transparent;
-        border-top: 20px solid #ff0000;  // ← change this color
+        border-top: 20px solid #ff0000;
         position: relative;
         cursor: pointer;
       `
       const dot = document.createElement('div')
       dot.style.cssText = `
         width: 8px; height: 8px; border-radius: 50%;
-        background: #ff0000;  // ← and this one
+        background: #ff0000;
         position: absolute;
         top: -24px; left: -4px;
       `
@@ -287,8 +284,6 @@ export default function MapPage() {
     return `${days} day${days !== 1 ? 's' : ''}`
   })()
 
-  const scheduledNodes = nodes.filter((n) => getNodeStatus(n, now) === 'scheduled')
-
   return (
     <div style={s.page}>
       <style>{`
@@ -319,9 +314,6 @@ export default function MapPage() {
 
       <div style={s.topLeft}>
         <button style={s.backBtn} onClick={() => navigate('/create')}>← Back to Form</button>
-        <div style={s.creativeBanner}>
-          <span style={s.creativeBannerText}></span>
-        </div>
       </div>
 
       <div style={s.stepBadge}>
@@ -329,7 +321,6 @@ export default function MapPage() {
       </div>
 
       {tapHint && <div style={s.tapHint}>{tapHint}</div>}
-
 
       <button
         style={{ ...s.panelTab, right: panelOpen ? '356px' : '0px' }}
@@ -398,19 +389,12 @@ export default function MapPage() {
 
 function createGeoJSONCircle(center, radiusInMeters, points = 64) {
   const coords = []
-  const lat = center[1]
-  const lng = center[0]
-  const metersPerDegreeLat = 111320
-  const metersPerDegreeLng = 111320 * Math.cos((lat * Math.PI) / 180)
-  const deltaLat = radiusInMeters / metersPerDegreeLat
-  const deltaLng = radiusInMeters / metersPerDegreeLng
-
+  const distanceX = radiusInMeters / (111320 * Math.cos((center[1] * Math.PI) / 180))
+  const distanceY = radiusInMeters / 110540
   for (let i = 0; i < points; i++) {
-    const angle = (i * 2 * Math.PI) / points
-    coords.push([
-      lng + deltaLng * Math.cos(angle),
-      lat + deltaLat * Math.sin(angle),
-    ])
+    const angle = (i * 360) / points
+    const rad = (angle * Math.PI) / 180
+    coords.push([center[0] + distanceX * Math.cos(rad), center[1] + distanceY * Math.sin(rad)])
   }
   coords.push(coords[0])
   return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [coords] } }
@@ -483,22 +467,6 @@ const s = {
     fontWeight: 700,
     whiteSpace: 'nowrap',
     boxShadow: '0 2px 12px rgba(0, 0, 0, 0.3)',
-  },
-  countdownLabel: {
-    position: 'absolute',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    zIndex: 10,
-    background: 'rgba(0,0,0,0.75)',
-    borderRadius: '8px',
-    padding: '6px 14px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '2px',
-    color: 'white',
-    fontFamily: 'var(--font-mono)',
-    fontSize: '11px',
   },
   panelTab: {
     position: 'absolute',
