@@ -6,10 +6,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   calculatePrice,
-  formatCountdown,
   getHeatColor,
   getNodeStatus,
-  rowToNode,
+  rowToNode
 } from '../lib/nodeUtils'
 import { fetchActiveNodes } from '../lib/supabase'
 import { useMapStore } from '../store/useMapStore'
@@ -331,12 +330,6 @@ export default function MapPage() {
 
       {tapHint && <div style={s.tapHint}>{tapHint}</div>}
 
-      {scheduledNodes.map((node, i) => (
-        <div key={`label-${node.id}`} style={{ ...s.countdownLabel, top: `${80 + i * 56}px` }}>
-          <span>{node.draftDrop?.trackTitle ?? 'Untitled'} · {node.draftDrop?.title ?? 'Unknown'}</span>
-          <span style={{ opacity: 0.6, fontSize: '10px' }}>live in {formatCountdown((node.startTime ?? 0) - now)}</span>
-        </div>
-      ))}
 
       <button
         style={{ ...s.panelTab, right: panelOpen ? '356px' : '0px' }}
