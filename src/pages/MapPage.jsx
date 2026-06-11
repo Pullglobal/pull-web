@@ -93,7 +93,7 @@ export default function MapPage() {
       style: 'mapbox://styles/mapbox/streets-v12',
       center: DEFAULT_CENTER,
       zoom: DEFAULT_ZOOM,
-      pitch: 45,
+      pitch: 0,
       bearing: -10,
       attributionControl: false,
     })
