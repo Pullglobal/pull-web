@@ -398,12 +398,19 @@ export default function MapPage() {
 
 function createGeoJSONCircle(center, radiusInMeters, points = 64) {
   const coords = []
-  const distanceX = radiusInMeters / (111320 * Math.cos((center[1] * Math.PI) / 180))
-  const distanceY = radiusInMeters / 110540
+  const lat = center[1]
+  const lng = center[0]
+  const metersPerDegreeLat = 111320
+  const metersPerDegreeLng = 111320 * Math.cos((lat * Math.PI) / 180)
+  const deltaLat = radiusInMeters / metersPerDegreeLat
+  const deltaLng = radiusInMeters / metersPerDegreeLng
+
   for (let i = 0; i < points; i++) {
-    const angle = (i * 360) / points
-    const rad = (angle * Math.PI) / 180
-    coords.push([center[0] + distanceX * Math.cos(rad), center[1] + distanceY * Math.sin(rad)])
+    const angle = (i * 2 * Math.PI) / points
+    coords.push([
+      lng + deltaLng * Math.cos(angle),
+      lat + deltaLat * Math.sin(angle),
+    ])
   }
   coords.push(coords[0])
   return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [coords] } }
