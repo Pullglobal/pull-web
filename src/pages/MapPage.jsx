@@ -200,10 +200,11 @@ export default function MapPage() {
       if (!markersRef.current[node.id]) {
         const el = document.createElement('div')
         el.style.cssText = `
-          width:28px;height:28px;border-radius:50%;
-          background:${dotColor};border:2.5px solid white;
-          box-shadow:0 2px 8px rgba(0,0,0,0.4);cursor:pointer;position:relative;
-        `
+        width:28px;height:28px;border-radius:50%;
+        background:${dotColor};border:2.5px solid white;
+        box-shadow:0 2px 8px rgba(0,0,0,0.4);cursor:pointer;position:relative;
+        z-index:10;shadow:0 2px 8px rgba(0,0,0,0.4);cursor:pointer;position:relative;
+              `
         if (status === 'live') {
           const pulse = document.createElement('div')
           pulse.style.cssText = `
