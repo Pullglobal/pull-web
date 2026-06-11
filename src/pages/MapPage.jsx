@@ -391,7 +391,7 @@ export default function MapPage() {
 function createGeoJSONCircle(center, radiusInMeters, points = 64) {
   const coords = []
   const distanceX = radiusInMeters / (111320 * Math.cos((center[1] * Math.PI) / 180))
-  const distanceY = radiusInMeters / 110540
+  const distanceY = radiusInMeters / 111320
   for (let i = 0; i < points; i++) {
     const angle = (i * 360) / points
     const rad = (angle * Math.PI) / 180
