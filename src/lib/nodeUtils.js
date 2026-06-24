@@ -79,6 +79,7 @@ export function rowToNode(row) {
     startTime: row.start_time,
     endTime: row.end_time,
     playCount: row.play_count ?? 0,
+    customGraphic: row.custom_graphic ?? null,
     draftDrop: {
       title: row.title,
       trackTitle: row.track_title,
