@@ -59,7 +59,7 @@ export function getHeatColor(playCount) {
 
 // ── Pricing ──────────────────────────────────────────────
 export function calculatePrice(drop, nodeCount) {
-  const base = 8; // first node, 24h, 1 track
+  const base = 7; // first node, 24h, 1 track
   const hours = drop?.durationHours ?? 24;
   const durationCost = hours < 24 ? 20 : (hours / 24 - 1) * 3; // beyond 24h
   const trackCount = drop?.tracks?.length || 1;
