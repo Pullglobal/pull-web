@@ -61,11 +61,11 @@ export function getHeatColor(playCount) {
 export function calculatePrice(drop, nodeCount) {
   const base = 7; // first node, 24h, 1 track
   const hours = drop?.durationHours ?? 24;
-  const durationCost = hours < 24 ? 20 : (hours / 24 - 1) * 3; // beyond 24h
+  const durationCost = hours < 24 ? 0 : (hours / 24 - 1) * 0; // beyond 24h
   const trackCount = drop?.tracks?.length || 1;
   const trackCost = (trackCount - 1) * 3;                      // beyond the first track
   const normalized = Math.min(drop?.radius ?? 15, 100) / 100;
-  const radiusCost = 70 * Math.pow(normalized, 2.8);
+  const radiusCost = 70 * Math.pow(normalized, 1.4);
   const extraNodeCost = Math.max(0, nodeCount - 1) * 5;        // beyond the first node
   return (base + durationCost + trackCost + radiusCost + extraNodeCost).toFixed(2);
 }
