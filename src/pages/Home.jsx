@@ -97,7 +97,24 @@ export default function Home() {
             allowing listeners to discover music where it belongs... in the real world.
           </p>
           <div style={styles.heroActions}>
-            <Link to="/create" style={styles.ctaPrimary}>Drop a Node →</Link>
+            {/* Drop a Node — desktop only */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <Link to="/create" style={styles.ctaPrimary}>
+                Drop a Node →
+              </Link>
+              <span style={styles.desktopOnly}>desktop only</span>
+            </div>
+
+            {/* Download App */}
+            <a
+              href="https://apps.apple.com/app/id6776660921"
+              target="_blank"
+              rel="noreferrer"
+              style={styles.ctaDownload}
+            >
+              Download App ↓
+            </a>
+
             <a href="#how" style={styles.ctaSecondary}>How it works</a>
           </div>
         </div>
@@ -150,10 +167,10 @@ export default function Home() {
               Streaming flattened music into an infinite scroll. Pull pulls music out of the matrix and puts it back where it belongs: with the people.
               Songs become tethered to places and moments that actually matter.
             </p>
-            <p style={styles.bodyText} >
+            <p style={styles.bodyText}>
               For artists, Pull is here to revolutionize the release strategy. Songs don't belong in bios, they belong in the real world.
-              As artists ourselves, our hope is that you will tell new stories, find new ways to prosper and rewrite the future of music with the tools this app offers. 
-              For listeners, Pull is an adventure waiting to happen. Discover new music as you wander a new city or get out to experience a drop by your favorite artist. 
+              As artists ourselves, our hope is that you will tell new stories, find new ways to prosper and rewrite the future of music with the tools this app offers.
+              For listeners, Pull is an adventure waiting to happen. Discover new music as you wander a new city or get out to experience a drop by your favorite artist.
             </p>
             <p style={styles.bodyText}>
               This isn't about racking up followers or appeasing an algorithm, it's about getting music out for the people and getting people out for the music.
@@ -250,7 +267,7 @@ const styles = {
   heroActions: {
     display: 'flex',
     gap: '20px',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     flexWrap: 'wrap',
   },
   ctaPrimary: {
@@ -258,11 +275,31 @@ const styles = {
     fontSize: '15px',
     fontWeight: 700,
     background: 'var(--black)',
-    color: 'var(--yellow)',
+    color: '#00FF7F',
     padding: '16px 32px',
     borderRadius: '2px',
     letterSpacing: '0.04em',
     display: 'inline-block',
+  },
+  desktopOnly: {
+    fontFamily: 'var(--font-mono)',
+    fontSize: '10px',
+    letterSpacing: '0.08em',
+    opacity: 0.45,
+    textAlign: 'center',
+    display: 'block',
+  },
+  ctaDownload: {
+    fontFamily: 'var(--font-mono)',
+    fontSize: '15px',
+    fontWeight: 700,
+    background: 'transparent',
+    color: 'var(--black)',
+    padding: '16px 32px',
+    borderRadius: '2px',
+    letterSpacing: '0.04em',
+    display: 'inline-block',
+    border: '1.5px solid var(--black)',
   },
   ctaSecondary: {
     fontFamily: 'var(--font-mono)',
@@ -271,6 +308,7 @@ const styles = {
     borderBottom: '1.5px solid var(--black)',
     paddingBottom: '2px',
     opacity: 0.7,
+    alignSelf: 'center',
   },
 
   // SECTIONS
