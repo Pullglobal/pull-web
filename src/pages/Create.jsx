@@ -73,10 +73,10 @@ const gateStyles = {
   },
   wordmark: {
     fontFamily: 'var(--font-mono)',
-    fontWeight: 700,
-    fontSize: '13px',
+    fontWeight: 1200,
+    fontSize: '29px',
     letterSpacing: '0.14em',
-    opacity: 0.4,
+    opacity: 0.1,
     marginBottom: '40px',
   },
   body: {
