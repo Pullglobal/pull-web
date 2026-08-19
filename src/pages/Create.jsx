@@ -76,7 +76,7 @@ const gateStyles = {
     fontWeight: 1200,
     fontSize: '29px',
     letterSpacing: '0.14em',
-    opacity: 0.1,
+    opacity: 1.0,
     marginBottom: '40px',
   },
   body: {
