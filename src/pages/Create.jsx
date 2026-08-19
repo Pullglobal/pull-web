@@ -9,15 +9,12 @@ import { useMapStore } from '../store/useMapStore'
 const ACCESS_PASSWORD = 'EMPFREE'
  
 function PasswordGate({ children }) {
-  const [unlocked, setUnlocked] = useState(
-    () => sessionStorage.getItem('pull_access') === 'granted'
-  )
+  const [unlocked, setUnlocked] = useState(false)
   const [input, setInput] = useState('')
   const [error, setError] = useState(false)
  
   const handleSubmit = () => {
     if (input.trim().toUpperCase() === ACCESS_PASSWORD) {
-      sessionStorage.setItem('pull_access', 'granted')
       setUnlocked(true)
     } else {
       setError(true)
