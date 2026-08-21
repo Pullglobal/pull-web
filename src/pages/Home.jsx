@@ -1,28 +1,27 @@
 import React, { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-
+ 
 function WarpGrid() {
   const canvasRef = useRef(null)
-
+ 
   useEffect(() => {
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
     let animFrame
     let t = 0
-
+ 
     const draw = () => {
       const W = canvas.width
       const H = canvas.height
       ctx.clearRect(0, 0, W, H)
       ctx.strokeStyle = 'rgba(10,10,10,0.25)'
       ctx.lineWidth = 1
-
+ 
       const cols = 22
       const rows = 16
       const cellW = W / cols
       const cellH = H / rows
-
-      // Draw warped vertical lines
+ 
       for (let i = 0; i <= cols; i++) {
         ctx.beginPath()
         for (let j = 0; j <= rows; j++) {
@@ -33,8 +32,7 @@ function WarpGrid() {
         }
         ctx.stroke()
       }
-
-      // Draw warped horizontal lines
+ 
       for (let j = 0; j <= rows; j++) {
         ctx.beginPath()
         for (let i = 0; i <= cols; i++) {
@@ -45,16 +43,16 @@ function WarpGrid() {
         }
         ctx.stroke()
       }
-
+ 
       t += 0.008
       animFrame = requestAnimationFrame(draw)
     }
-
+ 
     const resize = () => {
       canvas.width = canvas.offsetWidth
       canvas.height = canvas.offsetHeight
     }
-
+ 
     resize()
     draw()
     window.addEventListener('resize', resize)
@@ -63,7 +61,7 @@ function WarpGrid() {
       window.removeEventListener('resize', resize)
     }
   }, [])
-
+ 
   return (
     <canvas
       ref={canvasRef}
@@ -77,49 +75,65 @@ function WarpGrid() {
     />
   )
 }
-
+ 
 export default function Home() {
   return (
     <div style={styles.page}>
-
+ 
       {/* HERO */}
       <section style={styles.hero}>
         <div style={styles.gridWrapper}>
           <WarpGrid />
         </div>
-        <div style={styles.heroContent}>
-          <p style={styles.eyebrow}>Putting Music on the Map.</p>
-          <h1 style={styles.headline}>
-            What's your<br />Pull?
-          </h1>
-          <p style={styles.sub}>
-            Pull lets artists plant audio in real locations on a 3-D map,
-            allowing listeners to discover music where it belongs... in the real world.
-          </p>
-          <div style={styles.heroActions}>
-            {/* Drop a Node — desktop only */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <Link to="/create" style={styles.ctaPrimary}>
-                Drop a Node →
-              </Link>
-              <span style={styles.desktopOnly}>desktop only</span>
+ 
+        <div style={styles.heroInner}>
+          {/* LEFT — existing content */}
+          <div style={styles.heroLeft}>
+            <p style={styles.eyebrow}>Putting Music on the Map.</p>
+            <h1 style={styles.headline}>
+              What's your<br />Pull?
+            </h1>
+            <p style={styles.sub}>
+              Pull lets artists plant audio in real locations on a 3-D map,
+              allowing listeners to discover music where it belongs... in the real world.
+            </p>
+            <div style={styles.heroActions}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <Link to="/create" style={styles.ctaPrimary}>
+                  Drop a Node →
+                </Link>
+                <span style={styles.desktopOnly}>desktop only</span>
+              </div>
+ 
+              <a
+                href="https://apps.apple.com/app/id6776660921"
+                target="_blank"
+                rel="noreferrer"
+                style={styles.ctaDownload}
+              >
+                Download App ↓
+              </a>
+ 
+              <a href="#how" style={styles.ctaSecondary}>How it works</a>
             </div>
-
-            {/* Download App */}
-            <a
-              href="https://apps.apple.com/app/id6776660921"
-              target="_blank"
-              rel="noreferrer"
-              style={styles.ctaDownload}
-            >
-              Download App ↓
-            </a>
-
-            <a href="#how" style={styles.ctaSecondary}>How it works</a>
+          </div>
+ 
+          {/* RIGHT — video embed */}
+          <div style={styles.heroRight}>
+            <div style={styles.videoWrapper}>
+              <iframe
+                style={styles.videoFrame}
+                src="https://www.youtube.com/embed/L6kNNfCHo1g?rel=0&modestbranding=1"
+                title="Pull — music lives here"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
           </div>
         </div>
       </section>
-
+ 
       {/* HOW IT WORKS */}
       <section id="how" style={styles.section}>
         <p style={styles.sectionLabel}> how it works</p>
@@ -128,7 +142,7 @@ export default function Home() {
             {
               n: '01',
               title: 'Plant your sound',
-              body: 'Choose a location that means something. A corner where you wrote the song, A city block that shaped you, A venue you have a partnership with...Let you music live there.',
+              body: 'Choose a location that means something. A corner where you wrote the song, a city block that shaped you, a venue you have a partnership with... Let your music live there.',
             },
             {
               n: '02',
@@ -138,7 +152,7 @@ export default function Home() {
             {
               n: '03',
               title: 'It goes live',
-              body: 'Your drop appears on the Pull map. Listeners walking by are pulled. They play it, they lern about you and have an unforgettable ',
+              body: 'Your drop appears on the Pull map. Listeners walking by are pulled. They play it, they learn about you and have an unforgettable experience.',
             },
           ].map((s) => (
             <div key={s.n} style={styles.step}>
@@ -149,10 +163,10 @@ export default function Home() {
           ))}
         </div>
       </section>
-
+ 
       {/* DIVIDER */}
       <div style={styles.divider} />
-
+ 
       {/* WHY PULL */}
       <section style={styles.section}>
         <p style={styles.sectionLabel}> why pull</p>
@@ -178,10 +192,10 @@ export default function Home() {
           </div>
         </div>
       </section>
-
+ 
       {/* DIVIDER */}
       <div style={styles.divider} />
-
+ 
       {/* PRICING TEASER */}
       <section style={styles.section}>
         <p style={styles.sectionLabel}> drop pricing</p>
@@ -203,23 +217,23 @@ export default function Home() {
           <Link to="/create" style={styles.ctaPrimary}>Start your drop →</Link>
         </div>
       </section>
-
+ 
       {/* FOOTER */}
       <footer style={styles.footer}>
         <span style={styles.footerLogo}>PULL</span>
         <span style={styles.footerTag}>putting music on the map</span>
         <a href="mailto:info@pull.global" style={styles.footerLink}>info@pull.global</a>
       </footer>
-
+ 
     </div>
   )
 }
-
+ 
 const styles = {
   page: {
     paddingTop: '64px',
   },
-
+ 
   // HERO
   hero: {
     position: 'relative',
@@ -234,12 +248,41 @@ const styles = {
     inset: 0,
     opacity: 0.6,
   },
-  heroContent: {
+  heroInner: {
     position: 'relative',
     zIndex: 2,
-    maxWidth: '760px',
+    width: '100%',
+    maxWidth: '1200px',
+    margin: '0 auto',
     padding: '80px 40px',
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '64px',
+    alignItems: 'center',
   },
+  heroLeft: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  heroRight: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  videoWrapper: {
+    width: '100%',
+    aspectRatio: '16 / 9',
+    borderRadius: '4px',
+    overflow: 'hidden',
+    border: '1.5px solid rgba(10,10,10,0.15)',
+    boxShadow: '0 8px 32px rgba(10,10,10,0.12)',
+  },
+  videoFrame: {
+    width: '100%',
+    height: '100%',
+    display: 'block',
+  },
+ 
   eyebrow: {
     fontFamily: 'var(--font-mono)',
     fontSize: '13px',
@@ -249,7 +292,7 @@ const styles = {
   },
   headline: {
     fontFamily: 'var(--font-mono)',
-    fontSize: 'clamp(48px, 8vw, 96px)',
+    fontSize: 'clamp(40px, 6vw, 80px)',
     fontWeight: 700,
     lineHeight: 1.0,
     letterSpacing: '-0.02em',
@@ -257,10 +300,10 @@ const styles = {
   },
   sub: {
     fontFamily: 'var(--font-body)',
-    fontSize: 'clamp(16px, 2vw, 20px)',
+    fontSize: 'clamp(15px, 1.6vw, 18px)',
     fontWeight: 300,
     lineHeight: 1.7,
-    maxWidth: '520px',
+    maxWidth: '480px',
     marginBottom: '48px',
     opacity: 0.85,
   },
@@ -310,7 +353,7 @@ const styles = {
     opacity: 0.7,
     alignSelf: 'center',
   },
-
+ 
   // SECTIONS
   section: {
     padding: '100px 40px',
@@ -329,7 +372,7 @@ const styles = {
     opacity: 0.15,
     margin: '0 40px',
   },
-
+ 
   // HOW IT WORKS
   steps: {
     display: 'grid',
@@ -362,7 +405,7 @@ const styles = {
     lineHeight: 1.7,
     opacity: 0.8,
   },
-
+ 
   // WHY PULL
   twoCol: {
     display: 'grid',
@@ -385,7 +428,7 @@ const styles = {
     opacity: 0.8,
     marginBottom: '20px',
   },
-
+ 
   // PRICING
   pricingGrid: {
     display: 'grid',
@@ -417,7 +460,7 @@ const styles = {
     opacity: 0.6,
     lineHeight: 1.5,
   },
-
+ 
   // FOOTER
   footer: {
     borderTop: '1.5px solid var(--black)',
