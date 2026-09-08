@@ -126,6 +126,22 @@ const gateStyles = {
 }
  
 /* ======================================================
+   Genre options
+====================================================== */
+const GENRES = [
+  'Hip-Hop',
+  'Rock',
+  'Indie',
+  'Electronic',
+  'Pop',
+  'World',
+  'Ambient',
+  'Country',
+  'Jazz',
+  'Other',
+]
+ 
+/* ======================================================
    Create Page
 ====================================================== */
 export default function Create() {
@@ -137,6 +153,7 @@ export default function Create() {
   const [form, setForm] = useState({
     artistName: '',
     trackTitle: '',
+    genre: '',
     blurb: '',
     instructions: '',
     externalLink: '',
@@ -212,6 +229,7 @@ export default function Create() {
       const draft = {
         title: form.artistName,
         trackTitle: form.trackTitle,
+        genre: form.genre,
         description: form.blurb,
         collabNotes: form.instructions,
         externalLink: form.externalLink,
@@ -269,6 +287,22 @@ export default function Create() {
  
             <Field label="Artist Name" placeholder="Your Stage Name" value={form.artistName} onChange={v => update('artistName', v)} />
             <Field label="Track Title" placeholder="Name this track" value={form.trackTitle} onChange={v => update('trackTitle', v)} />
+ 
+            {/* Genre dropdown */}
+            <div style={fieldStyles.wrapper}>
+              <label style={fieldStyles.label}>Genre</label>
+              <select
+                style={fieldStyles.select}
+                value={form.genre}
+                onChange={e => update('genre', e.target.value)}
+              >
+                <option value="">Select a genre</option>
+                {GENRES.map(g => (
+                  <option key={g} value={g}>{g}</option>
+                ))}
+              </select>
+            </div>
+ 
             <Field label="Blurb" placeholder="I wrote this song right here after a nasty breakup..." value={form.blurb} onChange={v => update('blurb', v)} multiline />
             <Field label="Collabs or Special Instructions" placeholder="Give the Barista the Code 1FH4..." value={form.instructions} onChange={v => update('instructions', v)} multiline />
             <Field label="External Link" placeholder="https://soundcloud.com/yourtrack" value={form.externalLink} onChange={v => update('externalLink', v)} />
@@ -436,6 +470,23 @@ const fieldStyles = {
     color: 'var(--black)',
     outline: 'none',
     width: '100%',
+  },
+  select: {
+    background: 'rgba(255,255,255,0.55)',
+    border: '1.5px solid rgba(10,10,10,0.2)',
+    borderRadius: '4px',
+    padding: '14px 16px',
+    fontSize: '15px',
+    fontFamily: 'var(--font-body)',
+    color: 'var(--black)',
+    outline: 'none',
+    width: '100%',
+    cursor: 'pointer',
+    appearance: 'none',
+    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%230A0A0A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")`,
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'right 16px center',
+    paddingRight: '40px',
   },
 }
  
