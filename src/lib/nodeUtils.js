@@ -83,6 +83,7 @@ export function rowToNode(row) {
     draftDrop: {
       title: row.title,
       trackTitle: row.track_title,
+      genre: row.genre ?? null,
       description: row.description,
       collabNotes: row.collab_notes,
       externalLink: row.external_link,
