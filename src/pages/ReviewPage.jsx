@@ -44,6 +44,7 @@ function CheckoutForm({ finalTotal, onSuccess }) {
       longitude: node.coordinate.longitude,
       title: draftDrop.title,
       track_title: draftDrop.trackTitle,
+      genre: draftDrop.genre ?? null,
       description: draftDrop.description,
       collab_notes: draftDrop.collabNotes,
       external_link: draftDrop.externalLink,
@@ -140,7 +141,7 @@ function CheckoutForm({ finalTotal, onSuccess }) {
         onClick={handleSubmit}
         disabled={loading || !stripe}
       >
-        {loading ? 'Processing...' : finalTotal === 0 ? 'Drop for Free 🎵' : `Pay $${finalTotal.toFixed(2)} →`}
+        {loading ? 'Processing...' : finalTotal === 0 ? 'Drop for Free 🎵' : 'Drop →'}
       </button>
     </div>
   )
@@ -202,17 +203,17 @@ export default function ReviewPage() {
         <div style={s.card}>
           <Row label="Artist" value={draftDrop?.title ?? '—'} />
           <Row label="Track" value={draftDrop?.trackTitle ?? '—'} />
-          <Row label="Nodes" value={`${draftNodes.length}`} />
-          <Row label="Radius" value={`${draftDrop?.radius ?? 25}m`} />
-          <Row label="Duration" value={`${draftDrop?.durationHours ?? 24}hrs`} />
+          <Row label="Nodes" value="-" />
+          <Row label="Radius" value= "-" />
+          <Row label="Duration" value= "-" />
           {draftDrop?.scheduledStart && (
             <Row label="Goes live" value={new Date(draftDrop.scheduledStart).toLocaleString()} />
           )}
           <div style={s.divider} />
           {discount > 0 && (
-            <Row label={`Promo (${Math.round(discount * 100)}% off)`} value={`-$${discountAmount.toFixed(2)}`} green />
+           <Row label={`Promo (${Math.round(discount * 100)}% off)`} value="—" green />
           )}
-          <Row label="Total" value={`$${finalTotal.toFixed(2)}`} large />
+          <Row label="Total" value="—" large />
         </div>
 
         {/* Promo */}
