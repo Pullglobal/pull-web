@@ -386,7 +386,7 @@ export default function MapPage() {
       </div>
     </div>
   )
-}
+} 
 
 function createGeoJSONCircle(center, radiusInMeters, points = 64) {
   const coords = []
@@ -546,7 +546,7 @@ const s = {
     fontFamily: 'var(--font-mono)',
     fontSize: '28px',
     fontWeight: 700,
-    color: 'var(--blue)',
+    color: 'rgba(232,220,196,0.97)', // matches panel background — invisible
   },
   sliderBlock: { display: 'flex', flexDirection: 'column', gap: '10px' },
   sliderLabelRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' },
