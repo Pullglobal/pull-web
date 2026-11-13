@@ -57,6 +57,8 @@ function CheckoutForm({ finalTotal, onSuccess }) {
       end_time: (draftDrop.scheduledStart ?? now) + (draftDrop.durationHours ?? 24) * 3600000,
       status: draftDrop.scheduledStart && draftDrop.scheduledStart > now ? 'scheduled' : 'live',
       play_count: 0,
+      is_project: draftDrop.isProject ?? false,
+      tracks: draftDrop.tracks ?? [],
     }))
     const { error } = await supabase.from('nodes').insert(rows)
     if (error) throw error
@@ -203,9 +205,12 @@ export default function ReviewPage() {
         <div style={s.card}>
           <Row label="Artist" value={draftDrop?.title ?? '—'} />
           <Row label="Track" value={draftDrop?.trackTitle ?? '—'} />
+          {draftDrop?.isProject && draftDrop.tracks?.length > 0 && (
+            <Row label="Tracks" value={`${draftDrop.tracks.length} tracks`} />
+          )}
           <Row label="Nodes" value="-" />
-          <Row label="Radius" value= "-" />
-          <Row label="Duration" value= "-" />
+          <Row label="Radius" value="-" />
+          <Row label="Duration" value="-" />
           {draftDrop?.scheduledStart && (
             <Row label="Goes live" value={new Date(draftDrop.scheduledStart).toLocaleString()} />
           )}
@@ -325,4 +330,3 @@ const s = {
     border: 'none', borderRadius: '4px', padding: '14px 28px', cursor: 'pointer',
   },
 }
-

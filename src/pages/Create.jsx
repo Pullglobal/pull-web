@@ -1,3 +1,4 @@
+
 import React, { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
@@ -142,6 +143,18 @@ const GENRES = [
 ]
  
 /* ======================================================
+   Helpers
+====================================================== */
+// Converts "4:32" or "1:04:32" → milliseconds
+function parseTimeToMs(str) {
+  const parts = str.trim().split(':').map(Number)
+  if (parts.some(isNaN)) return 0
+  if (parts.length === 2) return (parts[0] * 60 + parts[1]) * 1000
+  if (parts.length === 3) return (parts[0] * 3600 + parts[1] * 60 + parts[2]) * 1000
+  return 0
+}
+ 
+/* ======================================================
    Create Page
 ====================================================== */
 export default function Create() {
@@ -177,6 +190,12 @@ export default function Create() {
     return d.toISOString().slice(0, 16)
   })
  
+  // Project / tracks state
+  const [isProject, setIsProject] = useState(false)
+  const [projectTracks, setProjectTracks] = useState([
+    { title: '', time: '0:00' },
+  ])
+ 
   const update = (k, v) => setForm(prev => ({ ...prev, [k]: v }))
  
   const handleAudioChange = (e) => {
@@ -203,6 +222,21 @@ export default function Create() {
     if (coverInputRef.current) coverInputRef.current.value = ''
   }
  
+  // Track editor helpers
+  const updateTrack = (index, field, value) => {
+    setProjectTracks(prev => prev.map((t, i) =>
+      i === index ? { ...t, [field]: value } : t
+    ))
+  }
+ 
+  const addTrack = () => {
+    setProjectTracks(prev => [...prev, { title: '', time: '' }])
+  }
+ 
+  const removeTrack = (index) => {
+    setProjectTracks(prev => prev.filter((_, i) => i !== index))
+  }
+ 
   const uploadFile = async (file, bucket) => {
     const ext = file.name.split('.').pop()
     const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
@@ -217,6 +251,10 @@ export default function Create() {
       setUploadError('Artist name and track title are required.')
       return
     }
+    if (isProject && projectTracks.some(t => !t.title.trim())) {
+      setUploadError('All tracks need a name.')
+      return
+    }
     setUploadError(null)
     setUploading(true)
     try {
@@ -225,6 +263,13 @@ export default function Create() {
  
       if (audioFile) audioUrl = await uploadFile(audioFile, 'audio')
       if (coverArt) coverUrl = await uploadFile(coverArt, 'covers')
+ 
+      const tracks = isProject
+        ? projectTracks.map(t => ({
+            title: t.title.trim(),
+            startMs: parseTimeToMs(t.time),
+          }))
+        : [{ title: form.trackTitle, startMs: 0 }]
  
       const draft = {
         title: form.artistName,
@@ -239,7 +284,8 @@ export default function Create() {
         scheduledStart: isScheduled ? new Date(scheduledDate).getTime() : undefined,
         radius: 25,
         durationHours: 24,
-        tracks: [{ title: form.trackTitle }],
+        isProject,
+        tracks,
       }
  
       setDraftDrop(draft)
@@ -286,7 +332,12 @@ export default function Create() {
           <div style={styles.form}>
  
             <Field label="Artist Name" placeholder="Your Stage Name" value={form.artistName} onChange={v => update('artistName', v)} />
-            <Field label="Track Title" placeholder="Name this track" value={form.trackTitle} onChange={v => update('trackTitle', v)} />
+            <Field
+              label={isProject ? 'Project / Album Title' : 'Track Title'}
+              placeholder={isProject ? 'Name this project' : 'Name this track'}
+              value={form.trackTitle}
+              onChange={v => update('trackTitle', v)}
+            />
  
             {/* Genre dropdown */}
             <div style={fieldStyles.wrapper}>
@@ -366,6 +417,62 @@ export default function Create() {
                     Remove Cover
                   </button>
                 </>
+              )}
+            </div>
+ 
+            {/* PROJECT TRACKS */}
+            <div style={styles.sectionBlock}>
+              <div style={styles.scheduleRow}>
+                <div>
+                  <p style={styles.sectionLabel}>Upload Type</p>
+                  <p style={styles.sectionHint}>
+                    {isProject
+                      ? 'Add track names and timestamps below.'
+                      : 'Toggle on if uploading an EP, album, or multi-track project.'}
+                  </p>
+                </div>
+                <button
+                  style={{
+                    ...styles.toggleBtn,
+                    background: isProject ? 'var(--blue)' : '#888',
+                  }}
+                  onClick={() => setIsProject(!isProject)}
+                >
+                  {isProject ? 'Project ✓' : 'Single'}
+                </button>
+              </div>
+ 
+              {isProject && (
+                <div style={styles.trackEditor}>
+                  {projectTracks.map((track, i) => (
+                    <div key={i} style={styles.trackRow}>
+                      <span style={styles.trackIndex}>{i + 1}</span>
+                      <input
+                        style={{ ...fieldStyles.input, flex: 1 }}
+                        placeholder="Track name"
+                        value={track.title}
+                        onChange={e => updateTrack(i, 'title', e.target.value)}
+                      />
+                      <input
+                        style={{ ...fieldStyles.input, width: '72px', textAlign: 'center' }}
+                        placeholder="0:00"
+                        value={track.time}
+                        onChange={e => updateTrack(i, 'time', e.target.value)}
+                      />
+                      {projectTracks.length > 1 && (
+                        <button
+                          style={styles.trackRemoveBtn}
+                          onClick={() => removeTrack(i)}
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button style={styles.addTrackBtn} onClick={addTrack}>
+                    + Add Track
+                  </button>
+                </div>
               )}
             </div>
  
@@ -569,6 +676,13 @@ const styles = {
     letterSpacing: '0.06em',
     opacity: 0.7,
   },
+  sectionHint: {
+    fontFamily: 'var(--font-body)',
+    fontSize: '12px',
+    opacity: 0.5,
+    marginTop: '2px',
+    lineHeight: 1.5,
+  },
   uploadBtn: {
     fontFamily: 'var(--font-mono)',
     fontSize: '13px',
@@ -639,6 +753,7 @@ const styles = {
     padding: '8px 16px',
     cursor: 'pointer',
     whiteSpace: 'nowrap',
+    flexShrink: 0,
   },
   dateInput: {
     fontFamily: 'var(--font-body)',
@@ -650,6 +765,49 @@ const styles = {
     color: 'var(--black)',
     outline: 'none',
     width: '100%',
+  },
+  trackEditor: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+  },
+  trackRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+  },
+  trackIndex: {
+    fontFamily: 'var(--font-mono)',
+    fontSize: '12px',
+    opacity: 0.4,
+    width: '16px',
+    textAlign: 'right',
+    flexShrink: 0,
+  },
+  trackRemoveBtn: {
+    fontFamily: 'var(--font-mono)',
+    fontSize: '12px',
+    color: '#B00020',
+    background: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    padding: '4px 6px',
+    flexShrink: 0,
+    opacity: 0.6,
+  },
+  addTrackBtn: {
+    fontFamily: 'var(--font-mono)',
+    fontSize: '12px',
+    letterSpacing: '0.06em',
+    fontWeight: 700,
+    background: 'transparent',
+    border: '1.5px dashed rgba(10,10,10,0.25)',
+    borderRadius: '4px',
+    padding: '12px',
+    cursor: 'pointer',
+    color: 'var(--black)',
+    opacity: 0.6,
+    textAlign: 'center',
   },
   nextBtn: {
     fontFamily: 'var(--font-mono)',
