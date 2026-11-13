@@ -1,19 +1,18 @@
-
 import React, { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useMapStore } from '../store/useMapStore'
- 
+
 /* ======================================================
    Password Gate
 ====================================================== */
 const ACCESS_PASSWORD = 'EMPFREE'
- 
+
 function PasswordGate({ children }) {
   const [unlocked, setUnlocked] = useState(false)
   const [input, setInput] = useState('')
   const [error, setError] = useState(false)
- 
+
   const handleSubmit = () => {
     if (input.trim().toUpperCase() === ACCESS_PASSWORD) {
       setUnlocked(true)
@@ -23,9 +22,9 @@ function PasswordGate({ children }) {
       setTimeout(() => setError(false), 2000)
     }
   }
- 
+
   if (unlocked) return children
- 
+
   return (
     <div style={gateStyles.page}>
       <div style={gateStyles.card}>
@@ -58,7 +57,7 @@ function PasswordGate({ children }) {
     </div>
   )
 }
- 
+
 const gateStyles = {
   page: {
     minHeight: '100vh',
@@ -125,7 +124,7 @@ const gateStyles = {
     cursor: 'pointer',
   },
 }
- 
+
 /* ======================================================
    Genre options
 ====================================================== */
@@ -141,7 +140,7 @@ const GENRES = [
   'Jazz',
   'Other',
 ]
- 
+
 /* ======================================================
    Helpers
 ====================================================== */
@@ -153,7 +152,7 @@ function parseTimeToMs(str) {
   if (parts.length === 3) return (parts[0] * 3600 + parts[1] * 60 + parts[2]) * 1000
   return 0
 }
- 
+
 /* ======================================================
    Create Page
 ====================================================== */
@@ -172,16 +171,16 @@ export default function Create() {
     externalLink: '',
     email: '',
   })
- 
+
   // Audio state
   const [audioFile, setAudioFile] = useState(null)
   const audioInputRef = useRef(null)
- 
+
   // Cover art state
   const [coverArt, setCoverArt] = useState(null)
   const [coverPreview, setCoverPreview] = useState(null)
   const coverInputRef = useRef(null)
- 
+
   // Schedule state
   const [isScheduled, setIsScheduled] = useState(false)
   const [scheduledDate, setScheduledDate] = useState(() => {
@@ -189,20 +188,20 @@ export default function Create() {
     d.setDate(d.getDate() + 1)
     return d.toISOString().slice(0, 16)
   })
- 
+
   // Project / tracks state
   const [isProject, setIsProject] = useState(false)
   const [projectTracks, setProjectTracks] = useState([
     { title: '', time: '0:00' },
   ])
- 
+
   const update = (k, v) => setForm(prev => ({ ...prev, [k]: v }))
- 
+
   const handleAudioChange = (e) => {
     const file = e.target.files[0]
     if (file) setAudioFile(file)
   }
- 
+
   const handleCoverChange = (e) => {
     const file = e.target.files[0]
     if (file) {
@@ -210,33 +209,33 @@ export default function Create() {
       setCoverPreview(URL.createObjectURL(file))
     }
   }
- 
+
   const removeAudio = () => {
     setAudioFile(null)
     if (audioInputRef.current) audioInputRef.current.value = ''
   }
- 
+
   const removeCover = () => {
     setCoverArt(null)
     setCoverPreview(null)
     if (coverInputRef.current) coverInputRef.current.value = ''
   }
- 
+
   // Track editor helpers
   const updateTrack = (index, field, value) => {
     setProjectTracks(prev => prev.map((t, i) =>
       i === index ? { ...t, [field]: value } : t
     ))
   }
- 
+
   const addTrack = () => {
     setProjectTracks(prev => [...prev, { title: '', time: '' }])
   }
- 
+
   const removeTrack = (index) => {
     setProjectTracks(prev => prev.filter((_, i) => i !== index))
   }
- 
+
   const uploadFile = async (file, bucket) => {
     const ext = file.name.split('.').pop()
     const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
@@ -245,7 +244,7 @@ export default function Create() {
     const { data } = supabase.storage.from(bucket).getPublicUrl(path)
     return data.publicUrl
   }
- 
+
   const handleContinue = async () => {
     if (!form.artistName || !form.trackTitle) {
       setUploadError('Artist name and track title are required.')
@@ -260,17 +259,17 @@ export default function Create() {
     try {
       let audioUrl = null
       let coverUrl = null
- 
+
       if (audioFile) audioUrl = await uploadFile(audioFile, 'audio')
       if (coverArt) coverUrl = await uploadFile(coverArt, 'covers')
- 
+
       const tracks = isProject
         ? projectTracks.map(t => ({
             title: t.title.trim(),
             startMs: parseTimeToMs(t.time),
           }))
         : [{ title: form.trackTitle, startMs: 0 }]
- 
+
       const draft = {
         title: form.artistName,
         trackTitle: form.trackTitle,
@@ -287,7 +286,7 @@ export default function Create() {
         isProject,
         tracks,
       }
- 
+
       setDraftDrop(draft)
       navigate('/map')
     } catch (err) {
@@ -296,12 +295,12 @@ export default function Create() {
       setUploading(false)
     }
   }
- 
+
   return (
     <PasswordGate>
       <div style={styles.page}>
         <div style={styles.inner}>
- 
+
           {/* Header */}
           <div style={styles.header}>
             <p style={styles.eyebrow}>// artist portal</p>
@@ -310,7 +309,7 @@ export default function Create() {
               Fill in your track details below. You'll place it on the map and set your radius next.
             </p>
           </div>
- 
+
           {/* Steps indicator */}
           <div style={styles.stepsRow}>
             {['Track Info', 'Place on Map', 'Review & Pay'].map((s, i) => (
@@ -327,100 +326,13 @@ export default function Create() {
               </div>
             ))}
           </div>
- 
+
           {/* Form */}
           <div style={styles.form}>
- 
+
             <Field label="Artist Name" placeholder="Your Stage Name" value={form.artistName} onChange={v => update('artistName', v)} />
-            <Field
-              label={isProject ? 'Project / Album Title' : 'Track Title'}
-              placeholder={isProject ? 'Name this project' : 'Name this track'}
-              value={form.trackTitle}
-              onChange={v => update('trackTitle', v)}
-            />
- 
-            {/* Genre dropdown */}
-            <div style={fieldStyles.wrapper}>
-              <label style={fieldStyles.label}>Genre</label>
-              <select
-                style={fieldStyles.select}
-                value={form.genre}
-                onChange={e => update('genre', e.target.value)}
-              >
-                <option value="">Select a genre</option>
-                {GENRES.map(g => (
-                  <option key={g} value={g}>{g}</option>
-                ))}
-              </select>
-            </div>
- 
-            <Field label="Blurb" placeholder="I wrote this song right here after a nasty breakup..." value={form.blurb} onChange={v => update('blurb', v)} multiline />
-            <Field label="Collabs or Special Instructions" placeholder="Give the Barista the Code 1FH4..." value={form.instructions} onChange={v => update('instructions', v)} multiline />
-            <Field label="External Link" placeholder="https://soundcloud.com/yourtrack" value={form.externalLink} onChange={v => update('externalLink', v)} />
-            <Field label="Contact Email" placeholder="your@email.com" value={form.email} onChange={v => update('email', v)} type="email" />
- 
-            {/* AUDIO */}
-            <div style={styles.sectionBlock}>
-              <p style={styles.sectionLabel}>Audio</p>
-              <input
-                ref={audioInputRef}
-                type="file"
-                accept=".mp3,.wav,.flac,.aiff,.ogg,.m4a,.aac,*/*"
-                style={{ display: 'none' }}
-                onChange={handleAudioChange}
-              />
-              <button
-                style={styles.uploadBtn}
-                onClick={() => audioInputRef.current?.click()}
-              >
-                {audioFile ? 'Change Audio' : 'Upload Audio'}
-              </button>
- 
-              {audioFile && (
-                <>
-                  <div style={styles.fileCard}>
-                    <span style={styles.fileIcon}>🎵</span>
-                    <span style={styles.fileName}>{audioFile.name}</span>
-                  </div>
-                  <button style={styles.removeBtn} onClick={removeAudio}>
-                    Remove Audio
-                  </button>
-                </>
-              )}
-            </div>
- 
-            {/* COVER ART */}
-            <div style={styles.sectionBlock}>
-              <p style={styles.sectionLabel}>Cover Art</p>
-              <input
-                ref={coverInputRef}
-                type="file"
-                accept="image/*"
-                style={{ display: 'none' }}
-                onChange={handleCoverChange}
-              />
-              <button
-                style={styles.uploadBtn}
-                onClick={() => coverInputRef.current?.click()}
-              >
-                {coverArt ? 'Change Cover Art' : 'Select Cover Image'}
-              </button>
- 
-              {coverPreview && (
-                <>
-                  <img
-                    src={coverPreview}
-                    alt="Cover art preview"
-                    style={styles.coverPreview}
-                  />
-                  <button style={styles.removeBtn} onClick={removeCover}>
-                    Remove Cover
-                  </button>
-                </>
-              )}
-            </div>
- 
-            {/* PROJECT TRACKS */}
+
+            {/* UPLOAD TYPE */}
             <div style={styles.sectionBlock}>
               <div style={styles.scheduleRow}>
                 <div>
@@ -441,7 +353,7 @@ export default function Create() {
                   {isProject ? 'Project ✓' : 'Single'}
                 </button>
               </div>
- 
+
               {isProject && (
                 <div style={styles.trackEditor}>
                   {projectTracks.map((track, i) => (
@@ -475,7 +387,95 @@ export default function Create() {
                 </div>
               )}
             </div>
- 
+
+            <Field
+              label={isProject ? 'Project / Album Title' : 'Track Title'}
+              placeholder={isProject ? 'Name this project' : 'Name this track'}
+              value={form.trackTitle}
+              onChange={v => update('trackTitle', v)}
+            />
+
+            {/* Genre dropdown */}
+            <div style={fieldStyles.wrapper}>
+              <label style={fieldStyles.label}>Genre</label>
+              <select
+                style={fieldStyles.select}
+                value={form.genre}
+                onChange={e => update('genre', e.target.value)}
+              >
+                <option value="">Select a genre</option>
+                {GENRES.map(g => (
+                  <option key={g} value={g}>{g}</option>
+                ))}
+              </select>
+            </div>
+
+            <Field label="Blurb" placeholder="I wrote this song right here after a nasty breakup..." value={form.blurb} onChange={v => update('blurb', v)} multiline />
+            <Field label="Collabs or Special Instructions" placeholder="Give the Barista the Code 1FH4..." value={form.instructions} onChange={v => update('instructions', v)} multiline />
+            <Field label="External Link" placeholder="https://soundcloud.com/yourtrack" value={form.externalLink} onChange={v => update('externalLink', v)} />
+            <Field label="Contact Email" placeholder="your@email.com" value={form.email} onChange={v => update('email', v)} type="email" />
+
+            {/* AUDIO */}
+            <div style={styles.sectionBlock}>
+              <p style={styles.sectionLabel}>Audio</p>
+              <input
+                ref={audioInputRef}
+                type="file"
+                accept=".mp3,.wav,.flac,.aiff,.ogg,.m4a,.aac,*/*"
+                style={{ display: 'none' }}
+                onChange={handleAudioChange}
+              />
+              <button
+                style={styles.uploadBtn}
+                onClick={() => audioInputRef.current?.click()}
+              >
+                {audioFile ? 'Change Audio' : 'Upload Audio'}
+              </button>
+
+              {audioFile && (
+                <>
+                  <div style={styles.fileCard}>
+                    <span style={styles.fileIcon}>🎵</span>
+                    <span style={styles.fileName}>{audioFile.name}</span>
+                  </div>
+                  <button style={styles.removeBtn} onClick={removeAudio}>
+                    Remove Audio
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* COVER ART */}
+            <div style={styles.sectionBlock}>
+              <p style={styles.sectionLabel}>Cover Art</p>
+              <input
+                ref={coverInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleCoverChange}
+              />
+              <button
+                style={styles.uploadBtn}
+                onClick={() => coverInputRef.current?.click()}
+              >
+                {coverArt ? 'Change Cover Art' : 'Select Cover Image'}
+              </button>
+
+              {coverPreview && (
+                <>
+                  <img
+                    src={coverPreview}
+                    alt="Cover art preview"
+                    style={styles.coverPreview}
+                  />
+                  <button style={styles.removeBtn} onClick={removeCover}>
+                    Remove Cover
+                  </button>
+                </>
+              )}
+            </div>
+
             {/* SCHEDULE */}
             <div style={styles.sectionBlock}>
               <div style={styles.scheduleRow}>
@@ -490,7 +490,7 @@ export default function Create() {
                   {isScheduled ? 'Scheduled ✓' : 'Drop Immediately'}
                 </button>
               </div>
- 
+
               {isScheduled && (
                 <input
                   type="datetime-local"
@@ -501,7 +501,7 @@ export default function Create() {
                 />
               )}
             </div>
- 
+
             {/* CTA */}
             {uploadError && (
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: '#B00020', textAlign: 'center' }}>
@@ -515,7 +515,7 @@ export default function Create() {
             >
               {uploading ? 'Uploading... (May take 30 secs)' : 'Continue to Map Placement →'}
             </button>
- 
+
             <p style={styles.legal}>
               By continuing you agree to Pull's{' '}
               <a href="/" style={{ borderBottom: '1px solid currentColor' }}>Terms of Service</a>
@@ -523,14 +523,14 @@ export default function Create() {
               <a href="/" style={{ borderBottom: '1px solid currentColor' }}>Privacy Policy</a>.
               Map placement and payment happen next.
             </p>
- 
+
           </div>
         </div>
       </div>
     </PasswordGate>
   )
 }
- 
+
 function Field({ label, placeholder, value, onChange, multiline, type = 'text' }) {
   return (
     <div style={fieldStyles.wrapper}>
@@ -554,7 +554,7 @@ function Field({ label, placeholder, value, onChange, multiline, type = 'text' }
     </div>
   )
 }
- 
+
 const fieldStyles = {
   wrapper: {
     display: 'flex',
@@ -596,7 +596,7 @@ const fieldStyles = {
     paddingRight: '40px',
   },
 }
- 
+
 const styles = {
   page: {
     paddingTop: '64px',
