@@ -59,6 +59,7 @@ function CheckoutForm({ finalTotal, onSuccess }) {
       play_count: 0,
       is_project: draftDrop.isProject ?? false,
       tracks: draftDrop.tracks ?? [],
+      tip_enabled: draftDrop.tipEnabled ?? false,
     }))
     const { error } = await supabase.from('nodes').insert(rows)
     if (error) throw error
@@ -213,6 +214,9 @@ export default function ReviewPage() {
           <Row label="Duration" value="-" />
           {draftDrop?.scheduledStart && (
             <Row label="Goes live" value={new Date(draftDrop.scheduledStart).toLocaleString()} />
+          )}
+          {draftDrop?.tipEnabled && (
+            <Row label="Tip Jar" value="Enabled ✓" green />
           )}
           <div style={s.divider} />
           {discount > 0 && (

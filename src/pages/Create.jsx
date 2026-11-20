@@ -195,6 +195,9 @@ export default function Create() {
     { title: '', time: '0:00' },
   ])
 
+  // Tip jar state — off by default
+  const [tipEnabled, setTipEnabled] = useState(false)
+
   const update = (k, v) => setForm(prev => ({ ...prev, [k]: v }))
 
   const handleAudioChange = (e) => {
@@ -285,6 +288,7 @@ export default function Create() {
         durationHours: 24,
         isProject,
         tracks,
+        tipEnabled,
       }
 
       setDraftDrop(draft)
@@ -500,6 +504,29 @@ export default function Create() {
                   onChange={e => setScheduledDate(e.target.value)}
                 />
               )}
+            </div>
+
+            {/* TIP JAR */}
+            <div style={styles.sectionBlock}>
+              <div style={styles.scheduleRow}>
+                <div>
+                  <p style={styles.sectionLabel}>Tip Jar</p>
+                  <p style={styles.sectionHint}>
+                    {tipEnabled
+                      ? 'Listeners can tip you from the player. Tips are collected by Pull and paid out to you.'
+                      : 'Allow listeners to send you a tip directly from the player card.'}
+                  </p>
+                </div>
+                <button
+                  style={{
+                    ...styles.toggleBtn,
+                    background: tipEnabled ? '#1a7a4a' : '#888',
+                  }}
+                  onClick={() => setTipEnabled(!tipEnabled)}
+                >
+                  {tipEnabled ? 'Tips On ✓' : 'Tips Off'}
+                </button>
+              </div>
             </div>
 
             {/* CTA */}
