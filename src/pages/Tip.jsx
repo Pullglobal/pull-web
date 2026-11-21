@@ -227,7 +227,9 @@ const s = {
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: '24px',
+    background: '#F5D000',
     flexShrink: 0,
+
   },
   artistInfo: { display: 'flex', flexDirection: 'column', gap: '4px' },
   artistName: {
