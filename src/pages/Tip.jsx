@@ -180,7 +180,7 @@ const s = {
     alignItems: 'center',
     justifyContent: 'center',
     padding: '40px 20px',
-    background: '#FAF9F6',
+    background: '#FD500',
   },
   inner: {
     width: '100%',
