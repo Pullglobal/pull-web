@@ -305,7 +305,7 @@ const s = {
     border: 'none',
     outline: 'none',
     padding: '14px 12px 14px 0',
-    background: 'transparent',
+    background: 'FD500',
     color: '#0A0A0A',
   },
 
