@@ -210,6 +210,7 @@ const s = {
     width: '100%',
     boxSizing: 'border-box',
     textAlign: 'left',
+    background: '#F5D000',
   },
   cover: {
     width: '64px',
