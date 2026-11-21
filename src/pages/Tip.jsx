@@ -236,6 +236,7 @@ const s = {
     fontWeight: 700,
     margin: 0,
     color: '#0A0A0A',
+    background: '#F5D000',
   },
   trackTitle: {
     fontFamily: 'var(--font-body, sans-serif)',
