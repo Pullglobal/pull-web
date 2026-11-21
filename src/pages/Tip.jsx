@@ -322,7 +322,7 @@ const s = {
     fontSize: '15px',
     fontWeight: 700,
     letterSpacing: '0.04em',
-    background: '#0A0A0A',
+    background: '#13de1a',
     color: '#F5D000',
     border: 'none',
     borderRadius: '6px',
